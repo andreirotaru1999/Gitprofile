@@ -1,0 +1,31 @@
+<div class="tabs">
+    <button (click)="switchTab('pagination')" [class.active]="selectedTab === 'pagination'">Pagination</button>
+    <button (click)="switchTab('infinite')" [class.active]="selectedTab === 'infinite'">Infinite Scroll</button>
+  </div>
+  
+  <div *ngIf="selectedTab === 'pagination'">
+    <div *ngFor="let user of users" class="user-card">
+        <a [routerLink]="['/users', user.login]">
+            <img [src]="user.avatar_url" alt="Avatar" />
+            <h2>{{ user.login }}</h2>
+        </a>
+    </div>
+    <span *ngIf="history.length > 0">
+        <button (click)="goToFirstPage()" [disabled]="loading">First</button>
+    </span>
+    <span *ngIf="history.length > 0">
+        <button (click)="goToPreviousPage()" [disabled]="loading">Previwes</button>
+    </span>
+    <span>
+      <button (click)="goToNextPage()" [disabled]="loading">Next</button>
+    </span>
+  </div>
+  
+  <div *ngIf="selectedTab === 'infinite'">
+    <div class="scroll-container" (scroll)="onScroll($event)">
+        <div *ngFor="let user of users">
+          <img [src]="user.avatar_url" width="50" height="50" />
+          <p>{{ user.login }}</p>
+        </div>
+      </div>
+  </div>
