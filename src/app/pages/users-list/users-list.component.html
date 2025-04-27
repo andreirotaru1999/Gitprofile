@@ -1,10 +1,25 @@
 <div class="tabs">
-  <button (click)="switchTab('pagination')" [class.active]="selectedTab === 'pagination'">Pagination</button>
-  <button (click)="switchTab('infinite')" [class.active]="selectedTab === 'infinite'">Infinite Scroll</button>
+  <button
+    (click)="switchTab('pagination')"
+    [class.active]="selectedTab === 'pagination'"
+  >
+    Pagination
+  </button>
+  <button
+    (click)="switchTab('infinite')"
+    [class.active]="selectedTab === 'infinite'"
+  >
+    Infinite Scroll
+  </button>
 </div>
 <div *ngIf="!loading">
   <div *ngIf="selectedTab === 'pagination'" class="users-container">
-    <a *ngFor="let user of users" [routerLink]="['/users', user.login]" [state]="{ user }" class="user-card">
+    <a
+      *ngFor="let user of users"
+      [routerLink]="['/users', user.login]"
+      [state]="{ user }"
+      class="user-card"
+    >
       <img [src]="user.avatar_url" alt="User Avatar" />
       <p>{{ user.login }}</p>
     </a>
@@ -12,14 +27,27 @@
       {{ errorMessage }}
     </div>
     <div class="pagination-buttons">
-      <button (click)="goToFirstPage()" [disabled]="history.length === 0">First</button>
-      <button (click)="goToPreviousPage()" [disabled]="history.length === 0">Previous</button>
+      <button (click)="goToFirstPage()" [disabled]="history.length === 0">
+        First
+      </button>
+      <button (click)="goToPreviousPage()" [disabled]="history.length === 0">
+        Previous
+      </button>
       <button (click)="goToNextPage()">Next</button>
     </div>
   </div>
 </div>
-<div *ngIf="selectedTab === 'infinite'" class="scroll-container" (scroll)="onScroll($event)">
-  <a *ngFor="let user of users" [routerLink]="['/users', user.login]" [state]="{ user }"  class="user-card">
+<div
+  *ngIf="selectedTab === 'infinite'"
+  class="scroll-container"
+  (scroll)="onScroll($event)"
+>
+  <a
+    *ngFor="let user of users"
+    [routerLink]="['/users', user.login]"
+    [state]="{ user }"
+    class="user-card"
+  >
     <img [src]="user.avatar_url" alt="User Avatar" />
     <p>{{ user.login }}</p>
   </a>

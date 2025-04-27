@@ -10,7 +10,7 @@ import { Location } from '@angular/common';
   selector: 'app-user-detail',
   imports: [CommonModule],
   templateUrl: './user-detail.component.html',
-  styleUrl: './user-detail.component.css'
+  styleUrl: './user-detail.component.css',
 })
 export class UserDetailComponent implements OnInit {
   username!: string;
@@ -19,48 +19,52 @@ export class UserDetailComponent implements OnInit {
   loading = true;
   errorMessage: string = '';
 
-
-  constructor(private route: ActivatedRoute, private router: Router, private gitHubService: GitHubService, private location: Location) {}
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private gitHubService: GitHubService,
+    private location: Location,
+  ) {}
 
   ngOnInit(): void {
     const state = history.state as { user?: User };
-  
+
     if (state?.user) {
       this.user = state.user;
-  
+
       this.gitHubService.getUserReposByUrl(this.user.repos_url).subscribe({
-        next: repos => {
+        next: (repos) => {
           this.repos = repos;
           this.loading = false;
         },
-        error: err => {
+        error: (err) => {
           this.errorMessage = 'Failed to load user repositories.' + err.message;
           this.loading = false;
-        }
+        },
       });
-  
     } else {
       const username = this.route.snapshot.paramMap.get('username')!;
-      
+
       this.gitHubService.getUserDetails(username).subscribe({
-        next: user => {
+        next: (user) => {
           this.user = user;
 
           this.gitHubService.getUserReposByUrl(user.repos_url).subscribe({
-            next: repos => {
+            next: (repos) => {
               this.repos = repos;
               this.loading = false;
             },
-            error: err => {
-              this.errorMessage = 'Failed to load user repositories.' + err.message;
+            error: (err) => {
+              this.errorMessage =
+                'Failed to load user repositories.' + err.message;
               this.loading = false;
-            }
+            },
           });
         },
-        error: err => {
+        error: (err) => {
           this.errorMessage = 'Failed to load user details.' + err.message;
           this.loading = false;
-        }
+        },
       });
     }
   }

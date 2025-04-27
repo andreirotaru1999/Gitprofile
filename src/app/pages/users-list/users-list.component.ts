@@ -53,6 +53,9 @@ export class UsersListComponent implements OnInit {
           this.users = [...this.users, ...response.users];
           this.nextSince = response.nextSince ?? 0;
           this.loading = false;
+          if (!triggeredByScroll) {
+            setTimeout(() => this.checkIfMoreUsersNeeded(), 0);
+          }
         },
         error: err => {
           this.errorMessage = 'Failed to load more users. Please try again.';
@@ -102,7 +105,7 @@ export class UsersListComponent implements OnInit {
   
     const threshold = 200; // px before bottom to trigger load
   
-    if (element.scrollHeight - element.scrollTop <= element.clientHeight + threshold && !this.loading) {
+    if (element.scrollHeight - element.scrollTop <= element.clientHeight + threshold && !this.loading && this.selectedTab === 'infinite') {
       this.since = this.nextSince ?? 0;
       this.fetchUsers(this.since, true); // true = triggered by scroll
     }
