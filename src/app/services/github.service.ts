@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { Observable, map } from 'rxjs';
+import { Observable, map, catchError, throwError  } from 'rxjs';
 import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { User } from '../shared/models/user.model';
+import { Repo } from '../shared/models/repo.model';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -25,7 +26,8 @@ export class GitHubService {
         const linkHeader = response.headers.get('Link');
         const nextSince = this.extractNextSince(linkHeader);
         return { users, nextSince };
-      })
+      }),
+      catchError(this.handleError('getUsers'))
     );
   }
 
@@ -47,5 +49,28 @@ export class GitHubService {
     return undefined;
   }
 
+  getUserDetails(username: string): Observable<User> {
+    const headers = new HttpHeaders({ Authorization: `token ${this.token}` });
+    return this.http.get<User>(`${this.apiUrl}/users/${username}`, { headers }).pipe(
+      catchError(this.handleError('getUserDetails'))
+    );
+  }
+  
+  getUserReposByUrl(url: string): Observable<Repo[]> {
+    const headers = new HttpHeaders({ Authorization: `token ${this.token}` });
+    return this.http.get<Repo[]>(url, { headers }).pipe(
+      catchError(this.handleError('getUserReposByUrl'))
+    );
+  }
+
+  private handleError(operation: string) {
+    return (error: any) => {
+      console.error(`[GitHubService] Error during ${operation}:`, error);
+      return throwError(() => new Error(`Something went wrong during ${operation}. Please try again later.`));
+    };
+  }
+
 }
+
+
 
