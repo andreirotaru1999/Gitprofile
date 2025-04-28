@@ -5,10 +5,16 @@ import { User } from '../../shared/models/user.model';
 import { Repo } from '../../shared/models/repo.model';
 import { CommonModule } from '@angular/common';
 import { Location } from '@angular/common';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
 
 @Component({
   selector: 'app-user-detail',
-  imports: [CommonModule],
+  imports: [
+    CommonModule,
+    MatButtonModule,
+    MatCardModule
+  ],
   templateUrl: './user-detail.component.html',
   styleUrl: './user-detail.component.css',
 })
@@ -38,7 +44,8 @@ export class UserDetailComponent implements OnInit {
           this.loading = false;
         },
         error: (err) => {
-          this.errorMessage = 'Failed to load user repositories.' + err.message;
+          this.errorMessage = 'Failed to load user repositories.';
+          console.error(err);
           this.loading = false;
         },
       });
@@ -55,14 +62,15 @@ export class UserDetailComponent implements OnInit {
               this.loading = false;
             },
             error: (err) => {
-              this.errorMessage =
-                'Failed to load user repositories.' + err.message;
+              this.errorMessage = 'Failed to load user repositories.';
+              console.error(err);
               this.loading = false;
             },
           });
         },
         error: (err) => {
-          this.errorMessage = 'Failed to load user details.' + err.message;
+          this.errorMessage = 'Failed to load user details.';
+          console.error(err);
           this.loading = false;
         },
       });

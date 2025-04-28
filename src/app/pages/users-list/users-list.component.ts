@@ -4,24 +4,35 @@ import { User } from '../../shared/models/user.model';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { HostListener } from '@angular/core';
+import { take } from 'rxjs';
+import { PaginationType } from '../../shared/models/constants/paginationType.enum';
+import { DEFAULT_PER_PAGE, FIRST_SINCE } from '../../shared/models/constants/app.constants';
+import { MatSlideToggleModule, MatSlideToggleChange } from '@angular/material/slide-toggle';
+import { MatButtonModule } from '@angular/material/button';
+
 
 
 @Component({
   selector: 'app-users-list',
-  imports: [CommonModule, RouterModule],
+  imports: [
+    CommonModule,
+    RouterModule,
+    MatSlideToggleModule,
+    MatButtonModule],
   templateUrl: './users-list.component.html',
   styleUrl: './users-list.component.css'
 })
 export class UsersListComponent implements OnInit {
   users: User[] = [];
   since: number = 0;
-  nextSince: number = 0;
-  perPage: number = 10;
+  nextSince: number = FIRST_SINCE;
+  perPage: number = DEFAULT_PER_PAGE;
   pageNumber = 1;
   loading: boolean = false;
-  selectedTab: string = 'pagination';
+  selectedTab: PaginationType = PaginationType.Pagination;
   history: number[] = [];
   errorMessage: string = '';
+  paginationType = PaginationType;
 
 
   constructor(private gitHubService: GitHubService) {}
@@ -33,46 +44,37 @@ export class UsersListComponent implements OnInit {
   fetchUsers(since: number = 0, triggeredByScroll: boolean = false): void {
     this.loading = true;
     this.errorMessage = '';
-
-  
-    if (this.selectedTab === 'pagination') {
-      this.gitHubService.getUsers(since, this.perPage).subscribe({
-        next: response => {
+    this.gitHubService.getUsers(since, this.perPage).pipe(take(1)).subscribe({
+      next: response => {
+        if (this.selectedTab === PaginationType.Pagination) {
           this.users = response.users;
-          this.nextSince = response.nextSince ?? 0;
-          this.loading = false;
-        },
-        error: err => {
-          this.errorMessage = 'Failed to load users. Please try again.';
-          this.loading = false;
         }
-      });
-    } else if (this.selectedTab === 'infinite') {
-      this.gitHubService.getUsers(since, this.perPage).subscribe({
-        next: response => {
+        if (this.selectedTab === PaginationType.Infinite) {
           this.users = [...this.users, ...response.users];
-          this.nextSince = response.nextSince ?? 0;
-          this.loading = false;
           if (!triggeredByScroll) {
             setTimeout(() => this.checkIfMoreUsersNeeded(), 0);
           }
-        },
-        error: err => {
-          this.errorMessage = 'Failed to load more users. Please try again.';
-          this.loading = false;
         }
-      });
-    }
+        this.nextSince = response.nextSince ?? 0;
+        this.loading = false;
+      },
+      error: err => {
+        this.errorMessage = 'Failed to load users. Please try again.';
+        console.error('Error fetching users:', err);
+        this.loading = false;
+      }
+    });
   }
 
   checkIfMoreUsersNeeded(): void {
     const scrollContainer = document.querySelector('.scroll-container') as HTMLElement;
-  
-    if (scrollContainer && scrollContainer.scrollHeight <= scrollContainer.clientHeight && !this.loading) {
+    const areMoreUsersNeeded = scrollContainer && scrollContainer.scrollHeight <= scrollContainer.clientHeight;
+    if (areMoreUsersNeeded && !this.loading) {
       this.since = this.nextSince ?? 0;
       this.fetchUsers(this.since, true);
     }
   }
+
 
   goToNextPage(): void {
     this.history.push(this.since);
@@ -103,17 +105,17 @@ export class UsersListComponent implements OnInit {
   onScroll(event?: any): void {
     const element = event?.target || document.scrollingElement || document.documentElement;
   
-    const threshold = 200; // px before bottom to trigger load
+    const threshold = 200; 
   
-    if (element.scrollHeight - element.scrollTop <= element.clientHeight + threshold && !this.loading && this.selectedTab === 'infinite') {
+    if (element.scrollHeight - element.scrollTop <= element.clientHeight + threshold && !this.loading && this.selectedTab === PaginationType.Infinite) {
       this.since = this.nextSince ?? 0;
-      this.fetchUsers(this.since, true); // true = triggered by scroll
+      this.fetchUsers(this.since, true);
     }
   }
 
-  switchTab(tab: string): void {
-    this.selectedTab = tab;
-    this.users = []; 
+  onToggleChange(event: MatSlideToggleChange): void {
+    this.selectedTab = event.checked ? PaginationType.Infinite : PaginationType.Pagination;
+    this.users = [];
     this.since = 0;
     this.history = [];
     this.fetchUsers();

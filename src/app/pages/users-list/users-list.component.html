@@ -1,19 +1,13 @@
-<div class="tabs">
-  <button
-    (click)="switchTab('pagination')"
-    [class.active]="selectedTab === 'pagination'"
-  >
-    Pagination
-  </button>
-  <button
-    (click)="switchTab('infinite')"
-    [class.active]="selectedTab === 'infinite'"
-  >
-    Infinite Scroll
-  </button>
+<h1 class="page-title">GitHub Users</h1>
+<div class="toggle-container">
+  <mat-slide-toggle (change)="onToggleChange($event)">
+    <span *ngIf="selectedTab === paginationType.Pagination">Pagination Mode</span>
+    <span *ngIf="selectedTab === paginationType.Infinite">Infinite Scroll Mode</span>
+  </mat-slide-toggle>
+
 </div>
 <div *ngIf="!loading">
-  <div *ngIf="selectedTab === 'pagination'" class="users-container">
+  <div *ngIf="selectedTab === paginationType.Pagination" class="scroll-container">
     <a
       *ngFor="let user of users"
       [routerLink]="['/users', user.login]"
@@ -27,13 +21,9 @@
       {{ errorMessage }}
     </div>
     <div class="pagination-buttons">
-      <button (click)="goToFirstPage()" [disabled]="history.length === 0">
-        First
-      </button>
-      <button (click)="goToPreviousPage()" [disabled]="history.length === 0">
-        Previous
-      </button>
-      <button (click)="goToNextPage()">Next</button>
+      <button mat-button (click)="goToFirstPage()" [disabled]="pageNumber === 1">First</button>
+      <button mat-button (click)="goToPreviousPage()" [disabled]="pageNumber === 1">Previous</button>
+      <button mat-button (click)="goToNextPage()">Next</button>
     </div>
   </div>
 </div>

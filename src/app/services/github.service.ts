@@ -4,6 +4,8 @@ import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { User } from '../shared/models/user.model';
 import { Repo } from '../shared/models/repo.model';
 import { environment } from '../../environments/environment';
+import { DEFAULT_PER_PAGE, FIRST_SINCE } from '../shared/models/constants/app.constants';
+
 
 @Injectable({
   providedIn: 'root',
@@ -15,10 +17,10 @@ export class GitHubService {
   constructor(private http: HttpClient) {}
 
   getUsers(
-    since: number = 0,
-    per_page: number = 10,
+    since: number = FIRST_SINCE,
+    perPage: number = DEFAULT_PER_PAGE,
   ): Observable<{ users: User[]; nextSince?: number }> {
-    const url = `${this.apiUrl}/users?since=${since}&per_page=${per_page}`;
+    const url = `${this.apiUrl}/users?since=${since}&per_page=${perPage}`;
     const headers = new HttpHeaders({
       Authorization: `token ${this.token}`,
     });
@@ -26,30 +28,11 @@ export class GitHubService {
     return this.http.get<User[]>(url, { observe: 'response', headers }).pipe(
       map((response: HttpResponse<User[]>) => {
         const users = response.body || [];
-        const linkHeader = response.headers.get('Link');
-        const nextSince = this.extractNextSince(linkHeader);
+        const nextSince = users[perPage - 1].id;
         return { users, nextSince };
       }),
       catchError(this.handleError('getUsers')),
     );
-  }
-
-  private extractNextSince(linkHeader: string | null): number | undefined {
-    if (!linkHeader) return undefined;
-
-    const links = linkHeader.split(',').map((part) => part.trim());
-    for (const link of links) {
-      const [urlPart, relPart] = link.split(';');
-      if (relPart?.includes('rel="next"')) {
-        const urlMatch = urlPart.match(/<(.+?)>/);
-        if (urlMatch) {
-          const url = new URL(urlMatch[1]);
-          const since = url.searchParams.get('since');
-          return since ? Number(since) : undefined;
-        }
-      }
-    }
-    return undefined;
   }
 
   getUserDetails(username: string): Observable<User> {

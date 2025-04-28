@@ -1,22 +1,37 @@
+<button mat-button (click)="goBack()">← Back to User List</button>
 <div class="user-detail-container">
-  <button (click)="goBack()">← Back to User List</button>
-
-  <div *ngIf="errorMessage" class="error-message">
-    {{ errorMessage }}
-  </div>
-
-  <div *ngIf="loading && !errorMessage">Loading user info...</div>
-
-  <div *ngIf="!loading && !errorMessage">
-    <h1>{{ user.login }}</h1>
-    <p><strong>Type:</strong> {{ user.type }}</p>
-    <img [src]="user.avatar_url" width="100" />
-
-    <h2>Repositories</h2>
-    <ul>
-      <li *ngFor="let repo of repos">
-        <a [href]="repo.html_url" target="_blank">{{ repo.name }}</a>
-      </li>
-    </ul>
-  </div>
+  <mat-card>
+    <div class = "user-info">
+  
+      <div *ngIf="errorMessage" class="error-message">
+        {{ errorMessage }}
+      </div>
+    
+      <div *ngIf="loading">Loading user info...</div>
+    
+      <div *ngIf="!loading">
+        <img [src]="user.avatar_url" width="120" class="user-avatar-large" />
+        <div>
+          <h1>{{ user.login }}</h1>
+          <p><strong>Type:</strong> {{ user.type }}</p>
+          <p><a [href]="user.html_url" target="_blank">View Full GitHub Profile</a></p>
+          <p><a [href]="user.followers_url" target="_blank">Followers</a></p>
+          <p><a [href]="user.following_url" target="_blank">Following</a></p>
+          <p><a [href]="user.organizations_url" target="_blank">Organizations</a></p>
+        </div>
+      </div>
+    </div>
+    
+    <div *ngIf="!loading && !errorMessage" class="repo-list-container">
+      <h2>Repositories:</h2>
+    
+      <ul class="repo-list">
+        <li *ngFor="let repo of repos" class="repo-item">
+          <a [href]="repo.html_url" target="_blank" class="repo-link">{{ repo.name }}</a>
+        </li>
+      </ul>
+    </div>
+  </mat-card>
+  
 </div>
+
